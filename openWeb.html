@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>브라우저로 연결 중...</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 90vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top-color: #007bff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 14px 24px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <h2>기본 브라우저로 이동 중입니다</h2>
+  <p>자동으로 열리지 않으면 아래 버튼을 눌러주세요.</p>
+  <a id="openBtn" class="btn" href="#">브라우저에서 열기</a>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const listId = params.get('list') || params.get('id');
+    const videoId = params.get('v');
+
+    // 1. 최종 목적지 웹 URL 구성
+    let targetUrl = 'https://www.youtube.com';
+    if (listId) {
+      targetUrl = `https://www.youtube.com/playlist?list=${listId}`;
+    } else if (videoId) {
+      targetUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    }
+
+    const ua = navigator.userAgent.toLowerCase();
+    const isAndroid = /android/.test(ua);
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+
+    let browserUrl = targetUrl;
+
+    if (isAndroid) {
+      // 안드로이드 기본 브라우저 강제 호출 Intent
+      const strippedUrl = targetUrl.replace(/^https?:\/\//, '');
+      browserUrl = `intent://${strippedUrl}#Intent;scheme=https;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end;`;
+    } else if (isIOS) {
+      // 카카오톡 인앱 웹뷰 탈출 -> 기본 브라우저(Safari) 호출
+      browserUrl = `kakaotalk://web/openExternal?url=${encodeURIComponent(targetUrl)}`;
+    }
+
+    // 수동 버튼 링크 설정
+    document.getElementById('openBtn').href = browserUrl;
+
+    // 페이지 진입 즉시 실행
+    window.location.href = browserUrl;
+  </script>
+</body>
+</html>
