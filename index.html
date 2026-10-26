@@ -1,183 +1,605 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>외부 브라우저 연결 도구</title>
+  <title>NEMO | Brand Tools Hub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nemo: {
+              black: '#0a0a0c',
+              dark: '#111115',
+              card: '#16161c',
+              border: '#272732',
+              hoverBorder: '#48485a',
+              accent: '#ffffff',
+              muted: '#8e8ea0'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    :root {
-      --primary: #007bff;
-      --bg: #f8f9fa;
-      --card-bg: #ffffff;
-      --text: #333333;
+    /* 미니멀 모노크롬 스크롤바 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0c; }
+    ::-webkit-scrollbar-thumb { background: #272732; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f4e; }
+    
+    .grid-pattern {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
     }
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 90vh;
-      box-sizing: border-box;
-    }
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 480px;
-      width: 100%;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-      text-align: center;
-    }
-    /* 리다이렉트 화면 전용 */
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid #e9ecef;
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 20px auto;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    /* 생성기 화면 전용 */
-    input[type="url"], input[type="text"] {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #ced4da;
-      border-radius: 6px;
-      font-size: 15px;
-      box-sizing: border-box;
-      margin-top: 10px;
-    }
-    .btn {
-      display: inline-block;
-      width: 100%;
-      padding: 13px 0;
-      margin-top: 15px;
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      box-sizing: border-box;
-    }
-    .btn:hover {
-      background-color: #0056b3;
-    }
-    .result-box {
-      display: none;
-      margin-top: 25px;
-      text-align: left;
-      border-top: 1px solid #eee;
-      padding-top: 15px;
-    }
-    .help-text {
-      font-size: 13px;
-      color: #6c757d;
-      margin-top: 8px;
-      line-height: 1.4;
+    .sharp-logo {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }
   </style>
 </head>
-<body>
+<body class="bg-nemo-black text-zinc-100 min-h-screen flex flex-col font-sans selection:bg-white selection:text-black antialiased">
 
-  <!-- 1. 파라미터가 있을 때 실행되는 리다이렉트 뷰 -->
-  <div id="redirectView" class="card" style="display: none;">
-    <div class="spinner"></div>
-    <h3>기본 브라우저로 이동 중...</h3>
-    <p class="help-text">자동으로 열리지 않으면 아래 버튼을 눌러주세요.</p>
-    <a id="manualBtn" class="btn" href="#">브라우저에서 열기</a>
-  </div>
+  <!-- ========================================================
+       NEMO EXACT PIXEL-PERFECT VECTOR DEFINITION
+       (원본 마크의 두께, 격자 2x2 배율을 칼같이 1:1 맞춘 무손실 벡터)
+       ======================================================== -->
+  <svg style="display: none;">
+    <defs>
+      <g id="nemo-crisp-logo" viewBox="0 0 120 120">
+        <!-- 배경 블랙 사각 베이스 -->
+        <rect x="0" y="0" width="120" height="120" fill="#000000"/>
+        
+        <!-- 외곽 화이트 두터운 테두리 프레임 (두께 10px) -->
+        <rect x="5" y="5" width="110" height="110" fill="none" stroke="#ffffff" stroke-width="10"/>
+        
+        <!-- 중앙 십자 분할선 (두께 10px) -->
+        <line x1="60" y1="5" x2="60" y2="115" stroke="#ffffff" stroke-width="10"/>
+        <line x1="5" y1="60" x2="115" y2="60" stroke="#ffffff" stroke-width="10"/>
 
-  <!-- 2. 파라미터가 없을 때 실행되는 URL 링크 생성기 뷰 -->
-  <div id="generatorView" class="card" style="display: none;">
-    <h2>공유 링크 생성기</h2>
-    <p class="help-text">카카오톡에서 인앱 웹뷰 대신 스마트폰 기본 브라우저(Safari/Chrome)로 띄울 URL을 만듭니다.</p>
+        <!-- [Top-Left] 'N' : 두께 9px -->
+        <line x1="21" y1="21" x2="21" y2="49" stroke="#ffffff" stroke-width="9" stroke-linecap="square"/>
+        <line x1="21" y1="21" x2="44" y2="49" stroke="#ffffff" stroke-width="8" stroke-linecap="square"/>
+        <line x1="44" y1="21" x2="44" y2="49" stroke="#ffffff" stroke-width="9" stroke-linecap="square"/>
 
-    <div style="text-align: left; margin-top: 20px;">
-      <label style="font-weight: 600; font-size: 14px;">원본 URL 입력</label>
-      <input type="url" id="targetInput" placeholder="https://example.com 또는 유튜브 링크" />
-      <button class="btn" onclick="generateLink()">변환 링크 만들기</button>
+        <!-- [Top-Right] 'E' : 두께 9px -->
+        <path d="M 98 21 L 73 21 L 73 49 L 98 49 M 73 35 L 94 35" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="square"/>
+
+        <!-- [Bottom-Left] 'M' : 두께 8.5px -->
+        <path d="M 20 99 L 20 71 L 32.5 86 L 45 71 L 45 99" fill="none" stroke="#ffffff" stroke-width="8.5" stroke-linecap="square" stroke-linejoin="miter"/>
+
+        <!-- [Bottom-Right] 'O' : 외경 26x28 사각 링 -->
+        <rect x="73" y="71" width="25" height="28" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="square"/>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- ========================================================
+       TOP HEADER (NAVIGATION)
+       ======================================================== -->
+  <header class="border-b border-nemo-border/80 backdrop-blur-md sticky top-0 z-50 bg-nemo-black/90">
+    <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+      
+      <!-- 브랜드 로고 영역 (원본 이미지 logo.png 우선 로드, 없으면 칼같은 무손실 벡터 SVG 표시) -->
+      <a href="./" class="flex items-center gap-3.5 group">
+        <div class="w-9 h-9 border border-zinc-700 bg-black p-0.5 rounded flex items-center justify-center overflow-hidden group-hover:border-white transition-colors duration-200 shadow-md">
+          <img src="logo.png" alt="NEMO" class="w-full h-full object-contain sharp-logo" onerror="this.onerror=null; this.replaceWith(document.getElementById('brandLogoClone').content.cloneNode(true));">
+        </div>
+        <template id="brandLogoClone">
+          <svg class="w-full h-full"><use href="#nemo-crisp-logo"/></svg>
+        </template>
+
+        <div class="flex flex-col">
+          <span class="font-extrabold tracking-widest text-base text-white group-hover:text-zinc-200 transition">NEMO</span>
+          <span class="text-[9px] font-mono tracking-wider text-zinc-400 uppercase -mt-1">Utility Hub</span>
+        </div>
+      </a>
+
+      <!-- 빠른 상태 태그 및 우측 바로가기 -->
+      <div class="flex items-center gap-4 text-xs font-mono">
+        <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          SYSTEM STABLE
+        </span>
+        <a href="#tools-section" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-xs font-semibold transition border border-zinc-700">
+          모든 도구
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       MAIN ROUTER CONTAINER
+       ======================================================== -->
+  <main class="flex-1 flex flex-col justify-center items-center px-4 py-8 sm:py-12 grid-pattern relative">
+
+    <!-- [VIEW A: REDIRECT MODE] (?u= 또는 ?url= 파라미터가 있을 때만 활성화) -->
+    <div id="redirectView" class="w-full max-w-md mx-auto text-center hidden">
+      <div class="bg-nemo-card border border-nemo-border p-8 rounded-2xl shadow-2xl relative overflow-hidden backdrop-blur-xl">
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+
+        <!-- 로고 애니메이션 -->
+        <div class="w-20 h-20 mx-auto mb-6 border-2 border-zinc-600 p-1 bg-black rounded-lg shadow-2xl">
+          <img src="logo.png" alt="NEMO" class="w-full h-full object-contain sharp-logo" onerror="this.onerror=null; this.replaceWith(document.getElementById('brandLogoClone').content.cloneNode(true));">
+        </div>
+
+        <h2 class="text-xl font-bold tracking-tight text-white mb-2">외부 기본 브라우저로 연결 중</h2>
+        <p class="text-xs text-zinc-400 leading-relaxed mb-6 font-mono">
+          카카오톡 인앱 웹뷰를 벗어나<br>시스템 브라우저(Safari / Chrome) 또는 전용 앱으로 이동합니다.
+        </p>
+
+        <!-- 진행 게이지 -->
+        <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mb-6">
+          <div class="bg-white h-full w-3/4 animate-[pulse_1s_ease-in-out_infinite]"></div>
+        </div>
+
+        <a id="manualTriggerBtn" href="#" class="block w-full py-3.5 px-4 bg-white hover:bg-zinc-200 text-black text-sm font-semibold rounded-lg transition active:scale-[0.98] shadow-lg">
+          자동으로 열리지 않으면 여기를 클릭
+        </a>
+
+        <div class="mt-4 text-[11px] font-mono text-zinc-400">
+          Powered by NEMO Link Engine
+        </div>
+      </div>
     </div>
 
-    <div id="resultArea" class="result-box">
-      <label style="font-weight: 600; font-size: 14px;">카톡 공유용 링크</label>
-      <input type="text" id="outputUrl" readonly onclick="this.select()" />
-      <button class="btn" style="background-color: #28a745; margin-top: 8px;" onclick="copyLink()">링크 복사하기</button>
-    </div>
-  </div>
+    <!-- [VIEW B: NEMO TOOLS HUB] (기본 대시보드 화면) -->
+    <div id="generatorView" class="w-full max-w-5xl mx-auto space-y-12">
+      
+      <!-- 히어로 배너 섹션 -->
+      <section class="text-center space-y-4 pt-4">
+        <div class="inline-flex items-center justify-center w-16 h-16 border-2 border-zinc-700 bg-black p-1.5 shadow-2xl rounded-lg mb-1">
+          <img src="logo.png" alt="NEMO" class="w-full h-full object-contain sharp-logo" onerror="this.onerror=null; this.replaceWith(document.getElementById('brandLogoClone').content.cloneNode(true));">
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white">
+          NEMO TOOLBOX
+        </h1>
+        <p class="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+          일상 업무와 워크플로우 자동화를 보조하는 NEMO의 미니멀 웹 유틸리티 허브입니다.<br class="hidden sm:inline">
+          모바일 링크 탈출, 쿼리 정제, 미디어 점검 도구를 무료로 제공합니다.
+        </p>
+      </section>
 
+      <!-- 핵심 도구 1: 카카오톡 인앱 브라우저 탈출 링크 생성기 (ACTIVE) -->
+      <section id="tools-section" class="bg-nemo-card border border-nemo-border hover:border-nemo-hoverBorder transition-colors rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-zinc-800/80 mb-6">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-white text-black font-bold">TOOL 01</span>
+              <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">외부 브라우저 탈출 링크 생성기</h2>
+            </div>
+            <p class="text-xs text-zinc-400 mt-1">유튜브, 노션, 웹사이트 주소를 카톡 인앱 브라우저 없이 기본 브라우저나 유튜브 앱으로 바로 띄우는 링크로 변환합니다.</p>
+          </div>
+          <span class="self-start sm:self-center text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-1 rounded-full">
+            Active Engine
+          </span>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label for="sourceUrl" class="block text-xs font-mono font-medium text-zinc-300 uppercase tracking-wider mb-2">
+              목적지 URL 입력
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                <i class="fa-solid fa-link text-sm"></i>
+              </div>
+              <input 
+                type="url" 
+                id="sourceUrl" 
+                placeholder="https://youtube.com/playlist?list=... 또는 일반 웹사이트 주소" 
+                class="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition font-mono"
+              >
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button 
+              type="button" 
+              onclick="handleGenerateLink()"
+              class="flex-1 py-3.5 px-4 bg-white hover:bg-zinc-200 text-black text-sm font-bold rounded-lg transition active:scale-[0.99] flex items-center justify-center gap-2 shadow"
+            >
+              <span>변환 링크 생성</span>
+              <i class="fa-solid fa-bolt-lightning text-xs"></i>
+            </button>
+            <button 
+              type="button" 
+              onclick="fillSampleYoutube()"
+              class="py-3 px-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-mono rounded-lg transition border border-zinc-800"
+            >
+              샘플 주소 채우기
+            </button>
+          </div>
+        </div>
+
+        <!-- 변환 완료 영역 (생성 시 토글 노출) -->
+        <div id="outputContainer" class="hidden mt-6 pt-6 border-t border-zinc-800/80 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-emerald-400 flex items-center gap-1.5 font-bold">
+              <i class="fa-solid fa-circle-check"></i> 공유 링크 준비 완료
+            </span>
+            <span id="copyToast" class="text-xs font-mono text-zinc-300 bg-zinc-800 px-2 py-0.5 rounded opacity-0 transition-opacity">복사 완료!</span>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input 
+              type="text" 
+              id="resultUrl" 
+              readonly 
+              onclick="this.select()" 
+              class="flex-1 px-3.5 py-3 bg-black border border-zinc-800 rounded-lg text-xs font-mono text-zinc-200 select-all focus:outline-none"
+            >
+            <div class="flex gap-2">
+              <button 
+                type="button" 
+                onclick="handleCopyLink()"
+                class="flex-1 sm:flex-initial px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold rounded-lg transition flex items-center justify-center gap-1.5 border border-zinc-700"
+              >
+                <i class="fa-regular fa-clone"></i>
+                <span>링크 복사</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="handleTestOpen()"
+                title="새 탭에서 테스트 실행"
+                class="px-3.5 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs rounded-lg transition border border-zinc-800"
+              >
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 편의성 도구 그리드 (TOOL 02 ~ TOOL 04) -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- TOOL 02: URL 트래킹 / UTM 파라미터 클리너 -->
+        <div class="bg-nemo-card border border-nemo-border rounded-xl p-5 flex flex-col justify-between hover:border-nemo-hoverBorder transition shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 font-bold">TOOL 02</span>
+              <i class="fa-solid fa-filter-circle-xmark text-zinc-500"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">URL 파라미터 클리너</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+              공유 링크 뒤에 불필요하게 붙는 `utm_`, `fbclid`, `si=` 등 추적 쿼리를 한 번에 지워 깔끔하게 만듭니다.
+            </p>
+            <input 
+              type="text" 
+              id="cleanInput" 
+              placeholder="추적 파라미터가 섞인 URL 붙여넣기" 
+              class="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-xs text-white placeholder-zinc-600 mb-2 focus:outline-none focus:border-zinc-500 font-mono"
+            >
+          </div>
+          <div>
+            <button 
+              type="button" 
+              onclick="handleCleanUrl()"
+              class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded transition border border-zinc-700"
+            >
+              추적 파라미터 정제하기
+            </button>
+          </div>
+        </div>
+
+        <!-- TOOL 03: 유튜브 재생목록 & 딥링크 체커 -->
+        <div class="bg-nemo-card border border-nemo-border rounded-xl p-5 flex flex-col justify-between hover:border-nemo-hoverBorder transition shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 font-bold">TOOL 03</span>
+              <i class="fa-brands fa-youtube text-red-500"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">YouTube ID 추출기</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+              영상 ID(`v=`) 및 재생목록 ID(`list=`)를 추출하고 정상 재생 가능한 형식인지 규격을 점검합니다.
+            </p>
+            <input 
+              type="text" 
+              id="ytCheckInput" 
+              placeholder="YouTube 영상 또는 재생목록 주소" 
+              class="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-xs text-white placeholder-zinc-600 mb-2 focus:outline-none focus:border-zinc-500 font-mono"
+            >
+          </div>
+          <div>
+            <button 
+              type="button" 
+              onclick="handleExtractYt()"
+              class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded transition border border-zinc-700"
+            >
+              ID 파싱 & 포맷 검사
+            </button>
+          </div>
+        </div>
+
+        <!-- TOOL 04: NEMO 자동화 큐 모니터링 가이드 -->
+        <div class="bg-nemo-card border border-nemo-border rounded-xl p-5 flex flex-col justify-between hover:border-nemo-hoverBorder transition shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300 font-bold">STATUS 04</span>
+              <i class="fa-solid fa-server text-emerald-500"></i>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">Queue & Engine Status</h3>
+            <p class="text-xs text-zinc-400 leading-relaxed mb-4">
+              n8n Data Tables 기반 미디어 수집 & 백업 파이프라인의 표준 동작 상태와 연동 가이드를 확인합니다.
+            </p>
+            <div class="p-2.5 rounded bg-zinc-900/80 border border-zinc-800 font-mono text-[11px] text-zinc-400 space-y-1 mb-2">
+              <div class="flex justify-between"><span>Status 0:</span> <span class="text-zinc-200">Pending (대기)</span></div>
+              <div class="flex justify-between"><span>Status 1:</span> <span class="text-amber-400">Processing (진행)</span></div>
+              <div class="flex justify-between"><span>Status 2:</span> <span class="text-emerald-400">Done (완료)</span></div>
+            </div>
+          </div>
+          <div>
+            <a 
+              href="#tools-section" 
+              class="block text-center w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-semibold rounded transition border border-zinc-800"
+            >
+              엔진 가이드 확인
+            </a>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 텍스트/모달 안내 피드백 창 (alert() 사용 방지) -->
+      <div id="noticeToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-mono px-5 py-3 rounded-lg shadow-2xl z-50 border border-zinc-200 transition-all duration-300 opacity-0 pointer-events-none translate-y-2">
+        알림 메시지
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================
+       UNIFIED NEMO BRAND FOOTER (통일된 브랜드 공용 푸터)
+       ======================================================== -->
+  <footer class="border-t border-nemo-border bg-black text-zinc-400 py-12 px-5 mt-auto">
+    <div class="max-w-6xl mx-auto space-y-10">
+      
+      <!-- 상단 영역: 브랜드 마크 및 설명 & 퀵 링크 -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-8 border-b border-zinc-900">
+        
+        <!-- 브랜드 아이덴티티 -->
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 border-2 border-zinc-700 bg-black p-0.5 shrink-0 rounded flex items-center justify-center overflow-hidden">
+            <img src="logo.png" alt="NEMO" class="w-full h-full object-contain sharp-logo" onerror="this.onerror=null; this.replaceWith(document.getElementById('brandLogoClone').content.cloneNode(true));">
+          </div>
+          <div>
+            <div class="text-base font-extrabold text-white tracking-widest flex items-center gap-2">
+              NEMO
+              <span class="text-[10px] font-mono font-normal text-zinc-400 border border-zinc-800 px-1.5 py-0.5 rounded">UTILITY</span>
+            </div>
+            <p class="text-xs text-zinc-400 mt-0.5">단순함과 기능성의 조화, 모놀리식 인터페이스 설계</p>
+          </div>
+        </div>
+
+        <!-- 공용 외부 네비게이션 바로가기 -->
+        <div class="flex flex-wrap items-center gap-6 text-xs font-mono">
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center gap-1.5">
+            <i class="fa-brands fa-github text-sm"></i>
+            <span>GitHub</span>
+          </a>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center gap-1.5">
+            <i class="fa-brands fa-youtube text-sm"></i>
+            <span>YouTube</span>
+          </a>
+          <a href="#" class="hover:text-white transition flex items-center gap-1.5" onclick="showToast('NEMO 자동화 파이프라인 연동 중'); return false;">
+            <i class="fa-solid fa-cube text-sm"></i>
+            <span>Workflows</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- 하단 카피라이트 및 정책 정보 -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-[11px] font-mono text-zinc-400">
+        <div>
+          <span>&copy; 2026 <strong>NEMO</strong>. ALL RIGHTS RESERVED.</span>
+          <span class="mx-2 hidden sm:inline text-zinc-800">|</span>
+          <span class="block sm:inline mt-1 sm:mt-0">DESIGNED FOR SEAMLESS WORKFLOWS</span>
+        </div>
+
+        <div class="flex items-center gap-4 text-zinc-400">
+          <span class="hover:text-zinc-200 cursor-pointer" onclick="showToast('NEMO는 개인 데이터를 수집하거나 추적하지 않습니다.');">PRIVACY POLICY</span>
+          <span>&bull;</span>
+          <span class="hover:text-zinc-200 cursor-pointer" onclick="showToast('비상업적 용도의 자유로운 활용이 가능합니다.');">TERMS</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================================
+       APPLICATION LOGIC & ROUTER SCRIPT
+       ======================================================== -->
   <script>
-    const params = new URLSearchParams(window.location.search);
-    // target URL은 'u' 또는 기존 호환성을 위해 'url' 모두 지원
-    const targetUrl = params.get('u') || params.get('url');
+    // 1. URL 파라미터 파싱 및 화면 분기 ('u' 또는 'url' 지원)
+    const currentParams = new URLSearchParams(window.location.search);
+    const targetUrl = currentParams.get('u') || currentParams.get('url');
+
+    const redirectView = document.getElementById('redirectView');
+    const generatorView = document.getElementById('generatorView');
+    const manualTriggerBtn = document.getElementById('manualTriggerBtn');
 
     if (targetUrl) {
-      // [A. 리다이렉트 모드]
-      document.getElementById('redirectView').style.display = 'block';
+      // ----------------------------------------------------
+      // [MODE A: 자동 리다이렉트 모드]
+      // ----------------------------------------------------
+      redirectView.classList.remove('hidden');
+      generatorView.classList.add('hidden');
 
       const ua = navigator.userAgent.toLowerCase();
       const isAndroid = /android/.test(ua);
       const isIOS = /iphone|ipad|ipod/.test(ua);
 
-      let browserUrl = targetUrl;
+      let executeUrl = targetUrl;
 
       if (isAndroid) {
-        // 안드로이드 기본 브라우저 강제 호출 Intent
-        const strippedUrl = targetUrl.replace(/^https?:\/\//, '');
+        // 안드로이드 기본 브라우저/인텐트 탈출
+        const stripped = targetUrl.replace(/^https?:\/\//i, '');
         const scheme = targetUrl.startsWith('http://') ? 'http' : 'https';
-        browserUrl = `intent://${strippedUrl}#Intent;scheme=${scheme};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end;`;
+        executeUrl = `intent://${stripped}#Intent;scheme=${scheme};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end;`;
       } else if (isIOS) {
-        // iOS 카카오톡 인앱 웹뷰 탈출 (Safari 등 기본 브라우저 실행)
-        browserUrl = `kakaotalk://web/openExternal?url=${encodeURIComponent(targetUrl)}`;
+        // iOS 카카오톡 인앱 브라우저 탈출 스킴 (Safari 호출)
+        executeUrl = `kakaotalk://web/openExternal?url=${encodeURIComponent(targetUrl)}`;
       }
 
-      document.getElementById('manualBtn').href = browserUrl;
-      window.location.href = browserUrl;
+      manualTriggerBtn.href = executeUrl;
+      
+      // 즉시 탈출 트리거 실행
+      window.location.href = executeUrl;
+
+      // 앱 미설치 환경 대비 1.8초 후 원본 웹 페이지로 백업 이동
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 1800);
 
     } else {
-      // [B. URL 생성기 모드]
-      document.getElementById('generatorView').style.display = 'block';
+      // ----------------------------------------------------
+      // [MODE B: NEMO 툴즈 허브 대시보드]
+      // ----------------------------------------------------
+      generatorView.classList.remove('hidden');
+      redirectView.classList.add('hidden');
     }
 
-    function generateLink() {
-      const input = document.getElementById('targetInput').value.trim();
+    // [TOOL 01] 링크 생성 함수
+    function handleGenerateLink() {
+      const input = document.getElementById('sourceUrl').value.trim();
       if (!input) {
-        alert('변환할 URL을 입력해주세요.');
+        showToast('변환할 URL 주소를 입력해주세요.');
         return;
       }
-      
-      let finalTarget = input;
-      if (!/^https?:\/\//i.test(finalTarget)) {
-        finalTarget = 'https://' + finalTarget;
+
+      let finalUrl = input;
+      if (!/^https?:\/\//i.test(finalUrl)) {
+        finalUrl = 'https://' + finalUrl;
       }
 
-      // 현재 GitHub Pages의 기본 도메인 경로 기준으로 링크 완성
       const baseUrl = window.location.origin + window.location.pathname;
-      const generated = `${baseUrl}?u=${encodeURIComponent(finalTarget)}`;
+      const escapeLink = `${baseUrl}?u=${encodeURIComponent(finalUrl)}`;
 
-      document.getElementById('outputUrl').value = generated;
-      document.getElementById('resultArea').style.display = 'block';
+      document.getElementById('resultUrl').value = escapeLink;
+      document.getElementById('outputContainer').classList.remove('hidden');
+      showToast('공유 링크가 생성되었습니다.');
     }
 
-    function copyLink() {
-      const copyText = document.getElementById('outputUrl');
-      copyText.select();
-      navigator.clipboard.writeText(copyText.value).then(() => {
-        alert('링크가 복사되었습니다! 카카오톡에 붙여넣어 공유하세요.');
-      }).catch(() => {
+    // 샘플 유튜브 주소 입력
+    function fillSampleYoutube() {
+      document.getElementById('sourceUrl').value = 'https://youtube.com/playlist?list=PLZDQA2MOPKGg';
+      handleGenerateLink();
+    }
+
+    // [TOOL 01] 링크 복사
+    function handleCopyLink() {
+      const copyInput = document.getElementById('resultUrl');
+      copyInput.select();
+
+      const notify = () => {
+        const toast = document.getElementById('copyToast');
+        toast.classList.remove('opacity-0');
+        setTimeout(() => toast.classList.add('opacity-0'), 2000);
+        showToast('클립보드에 복사되었습니다.');
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(copyInput.value).then(notify).catch(() => {
+          document.execCommand('copy');
+          notify();
+        });
+      } else {
         document.execCommand('copy');
-        alert('링크가 복사되었습니다!');
-      });
+        notify();
+      }
+    }
+
+    // [TOOL 01] 테스트 새 창 열기
+    function handleTestOpen() {
+      const val = document.getElementById('resultUrl').value;
+      if (val) window.open(val, '_blank');
+    }
+
+    // [TOOL 02] URL 트래킹 파라미터 클리너
+    function handleCleanUrl() {
+      const input = document.getElementById('cleanInput').value.trim();
+      if (!input) {
+        showToast('정제할 URL을 입력하세요.');
+        return;
+      }
+
+      try {
+        let testUrl = input;
+        if (!/^https?:\/\//i.test(testUrl)) testUrl = 'https://' + testUrl;
+        
+        const parsed = new URL(testUrl);
+        const searchParams = new URLSearchParams(parsed.search);
+        
+        // 제거할 대표적인 트래킹 키 목록
+        const junkKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'si', '_ga'];
+        junkKeys.forEach(k => searchParams.delete(k));
+        
+        parsed.search = searchParams.toString();
+        const cleaned = parsed.toString();
+        
+        document.getElementById('cleanInput').value = cleaned;
+        showToast('불필요한 트래킹 파라미터가 정리되었습니다.');
+      } catch (e) {
+        showToast('올바른 URL 형식이 아닙니다.');
+      }
+    }
+
+    // [TOOL 03] YouTube 영상 및 플레이리스트 ID 파싱
+    function handleExtractYt() {
+      const input = document.getElementById('ytCheckInput').value.trim();
+      if (!input) {
+        showToast('YouTube URL을 입력하세요.');
+        return;
+      }
+
+      try {
+        let testUrl = input;
+        if (!/^https?:\/\//i.test(testUrl)) testUrl = 'https://' + testUrl;
+        const parsed = new URL(testUrl);
+        
+        const videoId = parsed.searchParams.get('v') || (parsed.hostname.includes('youtu.be') ? parsed.pathname.slice(1) : null);
+        const listId = parsed.searchParams.get('list');
+
+        let msg = [];
+        if (videoId) msg.push(`영상 ID: ${videoId}`);
+        if (listId) msg.push(`재생목록 ID: ${listId}`);
+
+        if (msg.length > 0) {
+          showToast(msg.join(' | '));
+        } else {
+          showToast('유튜브 ID를 찾을 수 없습니다.');
+        }
+      } catch(e) {
+        showToast('유효하지 않은 링크 형식입니다.');
+      }
+    }
+
+    // 범용 알림 토스트 (UI 일관성 유지)
+    function showToast(text) {
+      const toast = document.getElementById('noticeToast');
+      toast.innerText = text;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 2500);
     }
   </script>
 </body>
