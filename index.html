@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>외부 브라우저 연결 도구</title>
+  <style>
+    :root {
+      --primary: #007bff;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #333333;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90vh;
+      box-sizing: border-box;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      text-align: center;
+    }
+    /* 리다이렉트 화면 전용 */
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid #e9ecef;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* 생성기 화면 전용 */
+    input[type="url"], input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 15px;
+      box-sizing: border-box;
+      margin-top: 10px;
+    }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 13px 0;
+      margin-top: 15px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .result-box {
+      display: none;
+      margin-top: 25px;
+      text-align: left;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+    }
+    .help-text {
+      font-size: 13px;
+      color: #6c757d;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 파라미터가 있을 때 실행되는 리다이렉트 뷰 -->
+  <div id="redirectView" class="card" style="display: none;">
+    <div class="spinner"></div>
+    <h3>기본 브라우저로 이동 중...</h3>
+    <p class="help-text">자동으로 열리지 않으면 아래 버튼을 눌러주세요.</p>
+    <a id="manualBtn" class="btn" href="#">브라우저에서 열기</a>
+  </div>
+
+  <!-- 2. 파라미터가 없을 때 실행되는 URL 링크 생성기 뷰 -->
+  <div id="generatorView" class="card" style="display: none;">
+    <h2>공유 링크 생성기</h2>
+    <p class="help-text">카카오톡에서 인앱 웹뷰 대신 스마트폰 기본 브라우저(Safari/Chrome)로 띄울 URL을 만듭니다.</p>
+
+    <div style="text-align: left; margin-top: 20px;">
+      <label style="font-weight: 600; font-size: 14px;">원본 URL 입력</label>
+      <input type="url" id="targetInput" placeholder="https://example.com 또는 유튜브 링크" />
+      <button class="btn" onclick="generateLink()">변환 링크 만들기</button>
+    </div>
+
+    <div id="resultArea" class="result-box">
+      <label style="font-weight: 600; font-size: 14px;">카톡 공유용 링크</label>
+      <input type="text" id="outputUrl" readonly onclick="this.select()" />
+      <button class="btn" style="background-color: #28a745; margin-top: 8px;" onclick="copyLink()">링크 복사하기</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    // target URL은 'u' 또는 기존 호환성을 위해 'url' 모두 지원
+    const targetUrl = params.get('u') || params.get('url');
+
+    if (targetUrl) {
+      // [A. 리다이렉트 모드]
+      document.getElementById('redirectView').style.display = 'block';
+
+      const ua = navigator.userAgent.toLowerCase();
+      const isAndroid = /android/.test(ua);
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+
+      let browserUrl = targetUrl;
+
+      if (isAndroid) {
+        // 안드로이드 기본 브라우저 강제 호출 Intent
+        const strippedUrl = targetUrl.replace(/^https?:\/\//, '');
+        const scheme = targetUrl.startsWith('http://') ? 'http' : 'https';
+        browserUrl = `intent://${strippedUrl}#Intent;scheme=${scheme};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end;`;
+      } else if (isIOS) {
+        // iOS 카카오톡 인앱 웹뷰 탈출 (Safari 등 기본 브라우저 실행)
+        browserUrl = `kakaotalk://web/openExternal?url=${encodeURIComponent(targetUrl)}`;
+      }
+
+      document.getElementById('manualBtn').href = browserUrl;
+      window.location.href = browserUrl;
+
+    } else {
+      // [B. URL 생성기 모드]
+      document.getElementById('generatorView').style.display = 'block';
+    }
+
+    function generateLink() {
+      const input = document.getElementById('targetInput').value.trim();
+      if (!input) {
+        alert('변환할 URL을 입력해주세요.');
+        return;
+      }
+      
+      let finalTarget = input;
+      if (!/^https?:\/\//i.test(finalTarget)) {
+        finalTarget = 'https://' + finalTarget;
+      }
+
+      // 현재 GitHub Pages의 기본 도메인 경로 기준으로 링크 완성
+      const baseUrl = window.location.origin + window.location.pathname;
+      const generated = `${baseUrl}?u=${encodeURIComponent(finalTarget)}`;
+
+      document.getElementById('outputUrl').value = generated;
+      document.getElementById('resultArea').style.display = 'block';
+    }
+
+    function copyLink() {
+      const copyText = document.getElementById('outputUrl');
+      copyText.select();
+      navigator.clipboard.writeText(copyText.value).then(() => {
+        alert('링크가 복사되었습니다! 카카오톡에 붙여넣어 공유하세요.');
+      }).catch(() => {
+        document.execCommand('copy');
+        alert('링크가 복사되었습니다!');
+      });
+    }
+  </script>
+</body>
+</html>
