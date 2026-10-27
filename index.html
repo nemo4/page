@@ -624,6 +624,84 @@
         toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
       }, 2500);
     }
+
+    // 1. PWA 서비스 워커 등록
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+    
+    // 2. 파라미터 파싱
+    const params = new URLSearchParams(window.location.search);
+    
+    // (A) 직접 링크 클릭 탈출 파라미터 (?u=...)
+    const directTarget = params.get('u') || params.get('url');
+    
+    // (B) 안드로이드 '공유하기'로 넘어온 데이터 (?share_url=... 또는 ?text=...)
+    const sharedUrl = params.get('share_url');
+    const sharedText = params.get('text');
+    
+    // 공유된 텍스트/URL에서 순수 주소 추출
+    let incomingTarget = sharedUrl || '';
+    if (!incomingTarget && sharedText) {
+      const match = sharedText.match(/https?:\/\/[^\s]+/);
+      if (match) incomingTarget = match[0];
+    }
+    
+    // -------------------------------------------------------------
+    // 분기 1: 카카오톡 등에서 탈출 링크를 타고 들어온 경우 (리다이렉트)
+    // -------------------------------------------------------------
+    if (directTarget) {
+      document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh;gap:20px;">
+          <div style="width:40px;height:40px;border:3px solid #232733;border-top-color:#2563eb;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+          <p style="font-size:15px;font-weight:600;">기본 브라우저로 이동 중입니다...</p>
+        </div>
+        <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+      `;
+    
+      const ua = navigator.userAgent.toLowerCase();
+      const isAndroid = /android/.test(ua);
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+    
+      let openUrl = directTarget;
+      if (isAndroid) {
+        const stripped = directTarget.replace(/^https?:\/\//, '');
+        const scheme = directTarget.startsWith('http://') ? 'http' : 'https';
+        openUrl = `intent://${stripped}#Intent;scheme=${scheme};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end;`;
+      } else if (isIOS) {
+        openUrl = `kakaotalk://web/openExternal?url=${encodeURIComponent(directTarget)}`;
+      }
+    
+      window.location.href = openUrl;
+    
+    // -------------------------------------------------------------
+    // 분기 2: 안드로이드 '공유하기' 패널에서 NEMO를 눌러 들어온 경우 (자동 복사)
+    // -------------------------------------------------------------
+    } else if (incomingTarget) {
+      const base = window.location.origin + window.location.pathname;
+      const finalNemoUrl = `${base}?u=${encodeURIComponent(incomingTarget)}`;
+    
+      // 클립보드 복사 시도
+      navigator.clipboard.writeText(finalNemoUrl).then(() => {
+        document.body.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh;gap:16px;text-align:center;padding:20px;">
+            <div style="font-size:42px;">📋</div>
+            <h2 style="font-size:20px;font-weight:800;color:#fff;">탈출 링크 복사 완료!</h2>
+            <p style="font-size:13px;color:#9ca3af;word-break:break-all;max-width:320px;">${finalNemoUrl}</p>
+            <p style="font-size:14px;color:#60a5fa;margin-top:10px;">카카오톡에 바로 붙여넣기 하세요.</p>
+          </div>
+        `;
+      }).catch(() => {
+        // 자동 복사 차단 시 수동 버튼 표시
+        document.body.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:90vh;gap:16px;text-align:center;padding:20px;">
+            <h2 style="font-size:20px;font-weight:800;color:#fff;">링크 변환 완료</h2>
+            <input type="text" value="${finalNemoUrl}" id="copyField" style="width:100%;max-width:300px;padding:10px;border-radius:6px;border:1px solid #333;background:#111;color:#fff;" />
+            <button onclick="navigator.clipboard.writeText('${finalNemoUrl}');alert('복사되었습니다!')" style="padding:12px 24px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-weight:bold;">복사하기</button>
+          </div>
+        `;
+      });
+    }
   </script>
 </body>
 </html>
