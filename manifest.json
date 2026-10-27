@@ -3,6 +3,7 @@
   "short_name": "NEMO",
   "description": "카카오톡 인앱 브라우저 탈출 링크 변환기",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#090a0f",
   "theme_color": "#090a0f",
